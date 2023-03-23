@@ -1,0 +1,148 @@
+﻿@using ShoppingOnline.Models;
+@model IEnumerable<Products>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@functions {
+    public bool isActiveCategory(Categories category)
+    {
+        bool activeCategory = false;
+        if (Request.QueryString["CategoryID"] != null && category.CategoryID != null && Request.Params["CategoryID"].Equals(category.CategoryID.ToString()))
+        {
+            activeCategory = true;
+        }
+
+        return activeCategory;
+    }
+}
+<style>
+    .d-flex {
+        display: flex;
+    }
+
+    .flex-row {
+        flex-direction: row!important;
+    }
+</style>
+@Html.AntiForgeryToken()
+<div class="form-horizontal">
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <form name="search" action="/Products" method="post">
+        <div class="d-flex flex-row" style="justify-content:flex-start; align-items: center;">
+            <div class="col-md-3 d-flex flex-row" style="justify-content:center; align-items: center;">
+                <label class="col-md-5">
+                    Enter text to search
+                </label>
+                <div class="col-md-7">
+                    <input id="Value" name="Value" class="form-control" value="@Session["search_value"]" />
+                </div>
+            </div>
+            <div class="col-md-3 d-flex flex-row" style="justify-content:center; align-items: center;">
+                <label class="col-md-5">
+                    Search in category
+                </label>
+                <div class="col-md-7">
+                    <select class="form-control" data-val="true" data-val-number="The field CategoryID must be a number." id="Category_CategoryID" name="Category.CategoryID" onchange="this.form.submit()">
+                        @foreach (Categories category in ViewBag.Categories)
+                        {
+                            <option value="@category.CategoryID" @if (category.CategoryID.ToString().Equals(Session["search_CategoryID"])) { @Html.Raw("selected") }>@category.CategoryName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex flex-row" style="justify-content:center; align-items: center;">
+                <label class="col-md-5">
+                    Search By
+                </label>
+                <div class="col-md-7">
+                    <select class="form-control" data-val="true" id="Property" name="Property" onchange="this.form.submit()">
+                        @foreach (string colName in ViewBag.DetailCols)
+                        {
+                            <option value="@colName" @if (colName.Equals(Session["search_property"])) { @Html.Raw("selected") }>@colName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-1 d-flex flex-row" style="justify-content:center; align-items: center;">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Search" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<hr />
+<div style="display: flex; flex-direction: row!important;">
+    <div class="col-xs-2 col-md-3">
+        <div class="container-fluid">
+            <table class="table table-hover">
+                <thead class="thead-dark" style="background-color: #5d7b9d;">
+                    <tr>
+                        <th class="text-center">
+                            Categories
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <td style="@if (Request.QueryString["CategoryID"] == null) { @Html.Raw("background-color: lightblue") }">
+                        @Html.ActionLink("All Categories", "Index")
+                    </td>
+
+                    @foreach (Categories category in ViewBag.Categories)
+                    {
+                        <tr>
+                            <td style="@if (isActiveCategory(category)) { @Html.Raw("background-color: lightblue") }">
+                                @Html.ActionLink(category.CategoryName, "Index", new { CategoryID = category.CategoryID })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-xs-10  col-md-9">
+        <div class="container-fluid">
+            <table class="table table-primary table-hover">
+                <thead class="thead-dark" style="background-color: #507cd1;">
+                    <tr>
+                        <th class="col-xs-1 text-center">
+                            #
+                        </th>
+                        <th class="col-xs-5 text-center">
+                            Product
+                        </th>
+                        <th class="col-xs-5 text-center">
+                            @Html.DisplayNameFor(model => model.Price)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int i = 1; }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                @i
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ProductName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Price)
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
